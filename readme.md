@@ -1,12 +1,10 @@
 # 🎫 Event Booking System
 
-> **Live Demo:** (https://linemate-assesment.onrender.com)
+> **Live Demo:** [https://linemate-assesment.onrender.com](https://linemate-assesment.onrender.com)
 
 A full-stack event booking platform built as an internship assessment. Users can browse events, book seats with a cinema-style seat selector, manage bookings, and join waitlists for fully-booked events. The system includes role-based access control, QR code ticket generation, real-time seat updates, and email notifications.
 
 ---
-
-##P
 
 ## 🛠️ Tech Stack
 
@@ -43,6 +41,8 @@ A full-stack event booking platform built as an internship assessment. Users can
 
 ### 1. Authentication & Authorization
 
+<img width="600" alt="Login Page" src="https://github.com/user-attachments/assets/cf221a04-96c8-4a00-8b66-cc5b876fe4b8" />
+
 - Email/password registration and login with bcrypt password hashing
 - Google OAuth login via Passport.js
 - JWT tokens (expire after 7 days)
@@ -56,18 +56,32 @@ A full-stack event booking platform built as an internship assessment. Users can
 
 ### 2. Admin Approval Workflow
 
-1. User requests admin access and enters a secret phrase (set in `.env`)
+**Step 1 — User requests admin access using the secret phrase:**
+
+<img width="700" alt="Request Admin Page" src="https://github.com/user-attachments/assets/c993acaa-ae76-4f2a-bf4c-6134d29f1a20" />
+
+**Step 2 — Test Leader approves or denies the request:**
+
+<img width="700" alt="Test Leader Dashboard" src="https://github.com/user-attachments/assets/563d9701-c8f2-48b0-a62b-f044f212e9d5" />
+
+1. User requests admin access and enters the secret phrase
 2. Request is submitted with status `pending`
 3. Test Leader approves or denies from their dashboard
 4. Approved users get the `admin` role; denied users must wait 24 hours before retrying
 
+> **Secret phrase for testing:** `HelloAdmin123`
+
 ### 3. Event Management
 
-**Users** can browse events, view details, and see real-time seat availability.
+**Admin Dashboard — create events and view registration stats:**
 
-**Admins** can create events via a modal form and view an admin dashboard showing total events, total registrations, and upcoming event counts.
+<img width="700" alt="Admin Dashboard" src="https://github.com/user-attachments/assets/99f996f2-845a-4385-945f-5d220889b66d" />
+
+Users can browse events, view details, and see real-time seat availability. Admins can create events via a modal form and view total events, registrations, and upcoming event counts.
 
 ### 4. Cinema-Style Seat Booking
+
+<img width="700" alt="Cinema Seat Selector" src="https://github.com/user-attachments/assets/52e91e12-c1fa-41b1-8776-04d9d7bf6db4" />
 
 - Seats displayed in a grid (10 per row) with labels like `A-1`, `A-2`, `B-1`, etc.
 - Color coding: **White** = Available, **Blue** = Selected, **Gray** = Booked
@@ -75,6 +89,8 @@ A full-stack event booking platform built as an internship assessment. Users can
 - Selected seat labels are sent to the backend on confirmation
 
 ### 5. Booking System
+
+<img width="700" alt="My Bookings with QR Code" src="https://github.com/user-attachments/assets/cbf7b87f-ad62-4e71-bfb4-9534fb2f01ee" />
 
 - Atomic availability checks prevent double-booking
 - Each booking stores the user, event, number of seats, specific seat labels, and a QR code
@@ -92,6 +108,10 @@ When an event is fully booked, users can join the waitlist with a seat count sel
 
 ### 7. QR Code Tickets
 
+**Scanning the QR code opens the verification page:**
+
+<img width="400" alt="QR Code Verification" src="https://github.com/user-attachments/assets/d66843b8-ab20-463d-9592-c4fbcf7f96a2" />
+
 - Generated on booking creation; stored as Base64 in the booking record
 - QR code links to `/verify/[bookingId]`
 - Verification page shows full ticket details (event, date, venue, user, seats) or an "Invalid Ticket" message
@@ -102,13 +122,17 @@ Users on the event detail page are joined to a WebSocket room (`event-[eventId]`
 
 ### 9. Email Notifications
 
+**Booking confirmation email with seat labels:**
+
+<img width="700" alt="Booking Confirmation Email" src="https://github.com/user-attachments/assets/919bdf48-b245-4d19-8ac7-18c9116bea2e" />
+
 | Email | Trigger |
 |---|---|
 | Booking Confirmation | Seat booking confirmed — includes seat labels |
 | Waitlist Notification | Waitlisted user gets a seat — includes assigned labels |
 | Cancellation Confirmation | Booking cancelled — includes released seat labels |
 
-> **Note:** Currently using Resend's sandbox mode (`onboarding@resend.dev`). Emails are only delivered to the Resend account owner's address. To send to any user, verify a domain in the Resend dashboard.
+> **Note:** Currently using Resend's sandbox mode. Emails are only delivered to `mohits9168@gmail.com` (the registered Resend account). To send to any user, verify a domain in the Resend dashboard.
 
 ### 10. Security
 
@@ -168,6 +192,8 @@ event-booking-system/
 │   │   │   └── VerifyBooking.js
 │   │   ├── services/        # API, Socket services
 │   │   └── App.js
+│   ├── public/
+│   │   └── _redirects
 │   ├── .env
 │   └── package.json
 │
@@ -280,7 +306,7 @@ npm start
 ## 📱 Feature Test Guide
 
 **Admin Approval Workflow**
-1. Login as any user → Request Admin → enter secret phrase
+1. Login as any user → Request Admin → enter secret phrase `HelloAdmin123`
 2. Login as Test Leader → approve/deny from Pending Requests
 
 **Cinema-Style Booking**
@@ -301,6 +327,7 @@ npm start
 | Passwords don't work after seeding | Run `node src/fix-password.js` |
 | MongoDB connection error | Check `MONGODB_URI` in `.env` |
 | Google OAuth fails | Verify `GOOGLE_CALLBACK_URL` in Google Cloud Console |
-| Email not sending | Check `RESEND_API_KEY` and your verified email |
+| Email not sending | Check `RESEND_API_KEY` and your verified Resend email |
 | Seat selector not showing | Ensure event has `totalSeats > 0` |
 | QR code shows JSON | Update `qrService.js` to use frontend URL |
+| 404 on page refresh (Render) | Ensure `_redirects` file exists in `frontend/public/` |
