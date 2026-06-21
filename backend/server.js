@@ -18,6 +18,9 @@ const adminRequestRoutes = require('./src/routes/adminRequestRoutes');
 
 const app = express();
 const httpServer = createServer(app);
+const User = require('./src/models/User');
+const Event = require('./src/models/Event');
+const bcrypt = require('bcryptjs');
 
 // Socket.io setup
 const io = new Server(httpServer, {
