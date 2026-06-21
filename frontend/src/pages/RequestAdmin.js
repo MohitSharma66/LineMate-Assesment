@@ -1,5 +1,5 @@
 import { CheckCircle, Clock, Key, Shield, XCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -11,16 +11,21 @@ const RequestAdmin = () => {
   const [requestStatus, setRequestStatus] = useState(null);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  const { refreshUser } = useAuth(); // <-- Import refreshUser
+  const { refreshUser } = useAuth();
+  
+  // Prevent infinite loops
+  const hasRefreshed = useRef(false);
 
   useEffect(() => {
     fetchStatus();
     fetchUser();
   }, []);
 
-  // Watch for approval status and refresh user data
+  // Watch for approval - only run once
   useEffect(() => {
-    if (requestStatus?.status === 'approved') {
+    if (requestStatus?.status === 'approved' && !hasRefreshed.current) {
+      hasRefreshed.current = true; // Prevent multiple runs
+      
       const refreshAndRedirect = async () => {
         toast.loading('Refreshing admin privileges...');
         const updatedUser = await refreshUser();
@@ -31,6 +36,7 @@ const RequestAdmin = () => {
           setTimeout(() => navigate('/admin'), 1500);
         } else {
           toast.error('Failed to refresh privileges. Please refresh the page.');
+          hasRefreshed.current = false; // Reset so user can retry
         }
       };
       refreshAndRedirect();
