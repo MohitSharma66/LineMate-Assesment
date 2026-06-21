@@ -36,9 +36,9 @@ const seedDatabase = async () => {
     // Create sample events
     const events = [
       {
-        name: 'Tech Conference 2024',
+        name: 'Tech Conference 2027',
         description: 'Annual technology conference featuring top industry speakers',
-        date: new Date('2024-03-15'),
+        date: new Date('2027-03-15'),
         time: '09:00 AM',
         venue: 'Convention Center, Hall A',
         totalSeats: 100,
@@ -49,7 +49,7 @@ const seedDatabase = async () => {
       {
         name: 'Music Festival',
         description: 'Outdoor music festival with multiple artists',
-        date: new Date('2024-04-20'),
+        date: new Date('2027-04-20'),
         time: '02:00 PM',
         venue: 'City Park',
         totalSeats: 500,
@@ -60,7 +60,7 @@ const seedDatabase = async () => {
       {
         name: 'Startup Pitch Night',
         description: 'Networking event for startups and investors',
-        date: new Date('2024-02-28'),
+        date: new Date('2027-02-28'),
         time: '06:30 PM',
         venue: 'Innovation Hub, Floor 3',
         totalSeats: 50,
@@ -88,9 +88,6 @@ const seedDatabase = async () => {
     console.log('Admin credentials:');
     console.log('Email: admin@example.com');
     console.log('Password: admin123');
-    console.log('\nUser credentials:');
-    console.log('Email: user@example.com');
-    console.log('Password: user123');
     process.exit(0);
   } catch (error) {
     console.error('Error seeding database:', error);
