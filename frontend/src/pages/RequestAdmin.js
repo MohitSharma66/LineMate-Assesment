@@ -1,5 +1,5 @@
 import { CheckCircle, Clock, Key, Shield, XCircle } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -10,38 +10,23 @@ const RequestAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [requestStatus, setRequestStatus] = useState(null);
   const [user, setUser] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
   const navigate = useNavigate();
-  const { refreshUser } = useAuth();
-  
-  // Prevent infinite loops
-  const hasRefreshed = useRef(false);
+  const { refreshUser, user: authUser } = useAuth();
 
   useEffect(() => {
     fetchStatus();
     fetchUser();
   }, []);
 
-  // Watch for approval - only run once
+  // Check if user is already admin (from auth context)
   useEffect(() => {
-    if (requestStatus?.status === 'approved' && !hasRefreshed.current) {
-      hasRefreshed.current = true; // Prevent multiple runs
-      
-      const refreshAndRedirect = async () => {
-        toast.loading('Refreshing admin privileges...');
-        const updatedUser = await refreshUser();
-        toast.dismiss();
-        
-        if (updatedUser?.role === 'admin') {
-          toast.success('Admin privileges activated! 🎉');
-          setTimeout(() => navigate('/admin'), 1500);
-        } else {
-          toast.error('Failed to refresh privileges. Please refresh the page.');
-          hasRefreshed.current = false; // Reset so user can retry
-        }
-      };
-      refreshAndRedirect();
+    if (authUser?.role === 'admin') {
+      // Already admin, redirect
+      toast.success('You are an admin!');
+      navigate('/admin');
     }
-  }, [requestStatus, refreshUser, navigate]);
+  }, [authUser, navigate]);
 
   const fetchUser = async () => {
     try {
@@ -91,6 +76,28 @@ const RequestAdmin = () => {
     }
   };
 
+  const handleActivateAdmin = async () => {
+    setRefreshing(true);
+    toast.loading('Activating admin privileges...');
+    
+    try {
+      const updatedUser = await refreshUser();
+      toast.dismiss();
+      
+      if (updatedUser?.role === 'admin') {
+        toast.success('Admin privileges activated! 🎉');
+        setTimeout(() => navigate('/admin'), 1000);
+      } else {
+        toast.error('Still not an admin. Please try again or contact support.');
+      }
+    } catch (error) {
+      toast.dismiss();
+      toast.error('Failed to refresh. Please refresh the page and try again.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const renderStatus = () => {
     if (!requestStatus) return null;
 
@@ -119,9 +126,16 @@ const RequestAdmin = () => {
               <CheckCircle className="w-6 h-6 text-green-600 mr-3" />
               <div>
                 <h3 className="font-semibold text-green-800">✅ Admin Access Approved!</h3>
-                <p className="text-sm text-green-700">
-                  You now have admin privileges! Redirecting to dashboard...
+                <p className="text-sm text-green-700 mb-3">
+                  Your request has been approved. Click the button below to activate your admin privileges.
                 </p>
+                <button
+                  onClick={handleActivateAdmin}
+                  disabled={refreshing}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {refreshing ? 'Activating...' : 'Activate Admin Access →'}
+                </button>
               </div>
             </div>
           </div>
@@ -206,7 +220,7 @@ const RequestAdmin = () => {
             ) : requestStatus?.status === 'pending' ? (
               '⏳ Request Pending'
             ) : requestStatus?.status === 'approved' ? (
-              '✅ Already Admin'
+              '✅ Already Approved'
             ) : (
               'Submit Request'
             )}
