@@ -1,10 +1,12 @@
 # 🎫 Event Booking System
 
-> **Live Demo:** [https://your-deployed-link.com](https://your-deployed-link.com)
+> **Live Demo:** (https://linemate-assesment.onrender.com)
 
 A full-stack event booking platform built as an internship assessment. Users can browse events, book seats with a cinema-style seat selector, manage bookings, and join waitlists for fully-booked events. The system includes role-based access control, QR code ticket generation, real-time seat updates, and email notifications.
 
 ---
+
+##P
 
 ## 🛠️ Tech Stack
 
