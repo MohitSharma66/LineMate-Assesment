@@ -47,6 +47,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      
+      const response = await api.get('/auth/me');
+      setUser(response.data.user);
+      return response.data.user;
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      return null;
+    }
+  };
+
   const register = async (name, email, password) => {
     try {
       const response = await api.post('/auth/register', { name, email, password });
@@ -79,6 +93,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     loading,
+    refreshUser,
     setUser: updateUser,   // <-- added for OAuth redirect
   };
 

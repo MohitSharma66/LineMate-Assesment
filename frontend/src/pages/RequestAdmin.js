@@ -2,6 +2,7 @@ import { CheckCircle, Clock, Key, Shield, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
 const RequestAdmin = () => {
@@ -10,11 +11,31 @@ const RequestAdmin = () => {
   const [requestStatus, setRequestStatus] = useState(null);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const { refreshUser } = useAuth(); // <-- Import refreshUser
 
   useEffect(() => {
     fetchStatus();
     fetchUser();
   }, []);
+
+  // Watch for approval status and refresh user data
+  useEffect(() => {
+    if (requestStatus?.status === 'approved') {
+      const refreshAndRedirect = async () => {
+        toast.loading('Refreshing admin privileges...');
+        const updatedUser = await refreshUser();
+        toast.dismiss();
+        
+        if (updatedUser?.role === 'admin') {
+          toast.success('Admin privileges activated! 🎉');
+          setTimeout(() => navigate('/admin'), 1500);
+        } else {
+          toast.error('Failed to refresh privileges. Please refresh the page.');
+        }
+      };
+      refreshAndRedirect();
+    }
+  }, [requestStatus, refreshUser, navigate]);
 
   const fetchUser = async () => {
     try {
@@ -93,13 +114,7 @@ const RequestAdmin = () => {
               <div>
                 <h3 className="font-semibold text-green-800">✅ Admin Access Approved!</h3>
                 <p className="text-sm text-green-700">
-                  You now have admin privileges! 
-                  <button 
-                    onClick={() => navigate('/admin')} 
-                    className="ml-2 text-green-800 font-medium underline"
-                  >
-                    Go to Admin Dashboard →
-                  </button>
+                  You now have admin privileges! Redirecting to dashboard...
                 </p>
               </div>
             </div>
