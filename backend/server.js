@@ -22,6 +22,8 @@ const User = require('./src/models/User');
 const Event = require('./src/models/Event');
 const bcrypt = require('bcryptjs');
 
+app.set('trust proxy', 1);
+
 // Socket.io setup
 const io = new Server(httpServer, {
   cors: {
