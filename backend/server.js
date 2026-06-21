@@ -93,8 +93,108 @@ io.on('connection', (socket) => {
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
+  .then(async () => {
+    console.log('Connected to MongoDB');
+    
+    // Auto-seed if database is empty
+    await autoSeedDatabase();
+  })
   .catch(err => console.error('MongoDB connection error:', err));
+
+// Auto-seed function
+const autoSeedDatabase = async () => {
+  try {
+    // Check if users exist
+    const userCount = await User.countDocuments();
+    if (userCount > 0) {
+      console.log('✅ Database already seeded. Skipping...');
+      return;
+    }
+
+    console.log('🌱 Seeding database...');
+
+    // Create admin
+    const adminPassword = await bcrypt.hash('admin123', 10);
+    const admin = new User({
+      name: 'Admin User',
+      email: 'admin@example.com',
+      password: adminPassword,
+      role: 'admin',
+      adminRequest: { status: 'none' }
+    });
+    await admin.save();
+
+    // Create test leader
+    const leaderPassword = await bcrypt.hash('leader123', 10);
+    const testLeader = new User({
+      name: 'Test Leader',
+      email: 'leader@example.com',
+      password: leaderPassword,
+      role: 'test_leader',
+      adminRequest: { status: 'none' }
+    });
+    await testLeader.save();
+
+    // Create regular user
+    const userPassword = await bcrypt.hash('user123', 10);
+    const user = new User({
+      name: 'Regular User',
+      email: 'user@example.com',
+      password: userPassword,
+      role: 'user',
+      adminRequest: { status: 'none' }
+    });
+    await user.save();
+
+    // Create sample events
+    const events = [
+      {
+        name: 'Tech Conference 2027',
+        description: 'Annual technology conference featuring top industry speakers',
+        date: new Date('2027-03-15'),
+        time: '09:00 AM',
+        venue: 'Convention Center, Hall A',
+        totalSeats: 100,
+        availableSeats: 100,
+        bookedSeats: [],
+        createdBy: admin._id
+      },
+      {
+        name: 'Music Festival',
+        description: 'Outdoor music festival with multiple artists',
+        date: new Date('2027-04-20'),
+        time: '02:00 PM',
+        venue: 'City Park',
+        totalSeats: 500,
+        availableSeats: 500,
+        bookedSeats: [],
+        createdBy: admin._id
+      },
+      {
+        name: 'Startup Pitch Night',
+        description: 'Networking event for startups and investors',
+        date: new Date('2027-02-28'),
+        time: '06:30 PM',
+        venue: 'Innovation Hub, Floor 3',
+        totalSeats: 50,
+        availableSeats: 50,
+        bookedSeats: [],
+        createdBy: admin._id
+      }
+    ];
+
+    await Event.insertMany(events);
+
+    console.log('✅ Database seeded successfully!');
+    console.log('📋 Test Credentials:');
+    console.log('  Admin: admin@example.com / admin123');
+    console.log('  Test Leader: leader@example.com / leader123');
+    console.log(`  Events created: ${events.length}`);
+
+  } catch (error) {
+    console.error('❌ Seed error:', error);
+  }
+};
 
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
